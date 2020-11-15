@@ -15,6 +15,24 @@ const RequestAblass = () => {
     { id: 7, label: "Gier" },
   ];
 
+  const validate = (values) => {
+    const errors = { error: "" };
+
+    var hasCheckboxChecked = false;
+    const keys = Object.keys(values);
+    keys.forEach((key) => {
+      if (values[key] === true) {
+        hasCheckboxChecked = true;
+      }
+    });
+
+    if (!hasCheckboxChecked) {
+      errors.error = "Es muss mindestens eine Sünde gewählt werden.";
+    }
+
+    return errors;
+  };
+
   const mapSinToinitialValue = () => {
     const initialValues = {};
     sins.forEach((sin) => {
@@ -25,23 +43,26 @@ const RequestAblass = () => {
 
   const formik = useFormik({
     initialValues: mapSinToinitialValue(),
-
+    validate,
     onSubmit: (values) => {
+      console.log("submitted");
       return navigate("/thanks");
     },
   });
   const { getFieldProps } = formik;
 
   const mapSinToCheckboxes = (sin) => {
+    const uniqueSinId = "sin_" + sin.id;
     return (
       <>
         <p>
           <input
             type="checkbox"
-            id={"sin_" + sin.id}
+            id={uniqueSinId}
+            key={uniqueSinId}
             {...getFieldProps(sin.id)}
           />
-          <label for={"sin_" + sin.id}>{sin.label}</label>
+          <label htmlFor={uniqueSinId}>{sin.label}</label>
         </p>
       </>
     );
@@ -51,6 +72,9 @@ const RequestAblass = () => {
     <>
       <p>Wähle deine Sünden und bitte um Ablass.</p>
       <form onSubmit={formik.handleSubmit}>
+        {formik.errors.error && formik.errors.error.length > 0 ? (
+          <p>{formik.errors.error}</p>
+        ) : null}
         {sins.map(mapSinToCheckboxes)}
         <button type="submit">Bitte um Ablass</button>
       </form>
